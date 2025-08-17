@@ -100,4 +100,121 @@ Candidate set size (neighbors) and propensity sharpness (the *3.0 in softmax(sco
 
 Reward window KEEP_WINDOW_S
 
+
 Regenerate files to create a larger or differently‑shaped dataset.
+
+
+```mermaid
+flowchart TD
+  %% ===== Styles =====
+  classDef sensor fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+  classDef rules fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+  classDef learning fill:#e8f5e8,stroke:#388e3c,color:#1b5e20
+  classDef safety fill:#fff3e0,stroke:#f57c00,color:#e65100
+  classDef action fill:#ffebee,stroke:#d32f2f,color:#b71c1c
+  classDef feedback fill:#f1f8e9,stroke:#689f38,color:#33691e
+  classDef decision fill:#fce4ec,stroke:#c2185b,color:#880e4f
+
+  %% ===== Main Flow =====
+  START(["HVAC Control Trigger<br/>Every 2-5 seconds"])
+  
+  %% Sensor Input
+  S1["Collect Sensor Data<br/>• Cabin temp/humidity<br/>• Outside temp/weather<br/>• Sun load sensors<br/>• Occupancy detection"]
+  
+  S2["Collect Context<br/>• Time of day<br/>• GPS location<br/>• Drive mode<br/>• User presence"]
+  
+  S3["Get User Profile<br/>• Historical preferences<br/>• Manual overrides<br/>• Comfort settings"]
+  
+  %% Core Logic
+  RULES["Physics-Based Rules<br/>Target temp = f(outside_temp, time, season)<br/>Fan speed = f(temp_delta, humidity)<br/>Mode = f(weather, efficiency_preference)"]
+  
+  CONTEXT{"Apply Context Adjustments"}
+  C1["Morning commute:<br/>Pre-heat/cool more aggressively"]
+  C2["Parking mode:<br/>Reduce power consumption"]
+  C3["High sun load:<br/>Increase cooling, activate sunshade"]
+  C4["Multiple occupants:<br/>Adjust for rear comfort zones"]
+  
+  %% Learning Component
+  LEARN["Neural Adjustment Layer<br/>personal_offset = NN(context, user_history)<br/>• Temperature preference: ±3°C<br/>• Fan preference: ±2 levels<br/>• Mode preference: auto/manual bias"]
+  
+  %% Safety Checks
+  SAFETY{"Safety Validation"}
+  SF1["Temperature bounds:<br/>16°C ≤ temp ≤ 32°C"]
+  SF2["Defog priority:<br/>Override for visibility"]
+  SF3["Battery protection:<br/>Limit power in low SOC"]
+  SF4["Air quality:<br/>Force recirculation if needed"]
+  
+  %% Action Selection
+  BANDIT["Multi-Armed Bandit Selection<br/>If multiple valid options:<br/>• UCB or Thompson Sampling<br/>• 3-5 candidate settings<br/>• Quick exploration (5% of time)"]
+  
+  ACTION["Execute HVAC Command<br/>• Set temperature<br/>• Adjust fan speed<br/>• Select air mode<br/>• Control zones"]
+  
+  %% Feedback Loop
+  MONITOR["Monitor User Response<br/>Window: 30-60 seconds"]
+  
+  FEEDBACK{"User Feedback?"}
+  F1["Manual Override<br/>Log: context + old_setting + new_setting<br/>Immediate learning update"]
+  F2["Comfort Query Response<br/>Too hot/cold/stuffy<br/>Voice or touch feedback"]
+  F3["No Action<br/>Implicit satisfaction<br/>Positive reward signal"]
+  
+  UPDATE["Update Models<br/>• Increment success counters<br/>• Update neural weights (online)<br/>• Adjust bandit priors<br/>• Store for offline training"]
+  
+  %% Offline Learning
+  OFFLINE["Offline Model Updates<br/>Daily/Weekly:<br/>• Retrain personalization NN<br/>• Update rule parameters<br/>• A/B test new features<br/>• Safety validation"]
+  
+  %% Main Flow Connections
+  START --> S1 --> S2 --> S3 --> RULES
+  
+  RULES --> CONTEXT
+  CONTEXT --> C1
+  CONTEXT --> C2  
+  CONTEXT --> C3
+  CONTEXT --> C4
+  
+  C1 --> LEARN
+  C2 --> LEARN
+  C3 --> LEARN
+  C4 --> LEARN
+  
+  LEARN --> SAFETY
+  SAFETY --> SF1
+  SAFETY --> SF2
+  SAFETY --> SF3
+  SAFETY --> SF4
+  
+  SF1 --> BANDIT
+  SF2 --> BANDIT
+  SF3 --> BANDIT
+  SF4 --> BANDIT
+  
+  BANDIT --> ACTION
+  ACTION --> MONITOR
+  MONITOR --> FEEDBACK
+  
+  %% Feedback Paths
+  FEEDBACK -->|"Override"| F1
+  FEEDBACK -->|"Voice/Touch"| F2
+  FEEDBACK -->|"No Action"| F3
+  
+  F1 --> UPDATE
+  F2 --> UPDATE
+  F3 --> UPDATE
+  
+  UPDATE --> START
+  
+  %% Offline Learning Connection
+  UPDATE -.->|"Batch data"| OFFLINE
+  OFFLINE -.->|"Updated models"| LEARN
+
+  %% Emergency Safety Override
+  SAFETY -->|"Critical Safety"| ACTION
+  
+  %% Style Applications
+  class START,S1,S2,S3 sensor
+  class RULES,C1,C2,C3,C4 rules
+  class LEARN,BANDIT,UPDATE,OFFLINE learning
+  class SAFETY,SF1,SF2,SF3,SF4 safety
+  class ACTION action
+  class F1,F2,F3,MONITOR feedback
+  class CONTEXT,FEEDBACK decision
+```
