@@ -1,4 +1,5 @@
 telemetry.signals
+```json
 {
   "ts": "2025-08-01T08:15:00Z",
   "user_id": "driver_001",
@@ -21,6 +22,7 @@ telemetry.signals
     "recent_overrides_7d": 3
   }
 }
+```
 
 
 
@@ -29,6 +31,7 @@ system.suggestion
 One per domain per decision point.
 
 Includes a propensity (probability of the chosen action within the local candidate set), confidence, and a short explanation.
+```json
 {
   "ts": "2025-08-01T08:15:00Z",
   "user_id": "driver_001",
@@ -44,13 +47,14 @@ Includes a propensity (probability of the chosen action within the local candida
   "suggestion": {"setpoint_c": 20, "fan": 2, "airflow_mode": "auto", "ac_on": true, "recirculation": true},
   "explanation": "Because it's morning and outside is 30°C with high traffic and solar 160 W/m²."
 }
-
+```
 
 
 
 user.action
 
 The system‑applied setting (origin: "system") plus any user override within 5–60s (origin: "user"), both tied back via suggestion_id.
+```json
 {
   "ts": "2025-08-01T08:15:00Z",
   "user_id": "driver_001",
@@ -61,12 +65,14 @@ The system‑applied setting (origin: "system") plus any user override within 5�
   "origin": "system",
   "suggestion_id": "f7e…c12"
 }
+```
 
 
 
 training.feedback
 
 Outcome at ts + 60s with reward shaping (here binary: kept=1.0, override=0.0) and occasional explicit thumbs up/down.
+```json
 {
   "ts": "2025-08-01T08:16:00Z",
   "user_id": "driver_001",
@@ -76,6 +82,7 @@ Outcome at ts + 60s with reward shaping (here binary: kept=1.0, override=0.0) an
   "outcome": {"kept": false, "override_within_s": 26, "explicit_feedback": null},
   "reward": 0.0
 }
+```
 How the generator behaves
 
 Drivers & profiles: 8 drivers with distinct clusters (e.g., cool_mornings, very_cool), recirculation & fan‑noise preferences, seat‑heat thresholds, music preferences per time of day, base volume, and destination habits (work/home/daycare/gym/grocery).
@@ -218,3 +225,4 @@ flowchart TD
   class F1,F2,F3,MONITOR feedback
   class CONTEXT,FEEDBACK decision
 ```
+
